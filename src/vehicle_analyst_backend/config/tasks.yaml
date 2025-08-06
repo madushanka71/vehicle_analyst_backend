@@ -1,0 +1,140 @@
+vehicle_image_finder:
+  description: >
+    Find a working image url for {vehicle1} and {vehicle2}
+  expected_output: >
+    Two direct URLs to both comparing vehicle models
+    {
+      "vehicle1": "vheicle1 image URL"
+      "vehicle2": "vehicle2 image URL"
+    }
+  agent: vehicle_spec_comparer
+
+
+spec_compare_task:
+  description: >
+    Search general internet for {vehicle1} and {vehicle2} for technical specifications (engine size, fuel economy), reliability ratings, common pros and cons, and a summary of expert reviews. Get Image URLs form image_urls.
+  expected_output: >
+    A well-formatted JSON object with the following exact structure:
+    {
+      "vehicle": [{
+        "model_info": {
+          "make": "make",
+          "model": "model",
+          "year": "year",
+          "trim": "trim",
+          "vehicle_type": "vehicle type",
+          "image_url": "relevent image URL from the image_urls"
+        },
+        "key_specs": {
+          "engine": "engine",
+          "horsepower": "horsepower",
+          "torque": "torque",
+          "transmission": "transmission",
+          "drivetrain": "drivetrain",
+          "fuel_economy": "fuel_economy",
+          "seating": "seating",
+          "cargo_space": "cargo_space"
+        },
+        "pricing": {
+          "base_price": "base_price",
+          "as_tested": "as_tested",
+          "incentives": "incentives"
+        },
+        "ratings": {
+          "reliability": {
+            "score": "score",
+            "warranty": "warranty"
+          },
+          "safety": "safety"
+        },
+        "pros": ["pros"],
+        "cons": ["cons"],
+        "common_issues": ["common_issues"],
+        "expert_verdict": "expert_verdict",
+        "user_rating": "user_rating"
+      }],
+      "key_differences": [
+          {
+            "category": "category",
+            "vehicle1": "vehicle1 key differences",
+            "vehicle2": "vehicle2 key differences"
+          }
+        ],
+        "winners": {
+          "performance": "winner in performance",
+          "efficiency": "winner in efficiency",
+          "value": "winner in value",
+          "overall": "winner in overall"
+        },
+        "recommendations": {
+          "best_for_commuters": "best for commuters",
+          "best_for_families": "best for families",
+          "best_for_enthusiasts": "best for enthusiasts"
+        }
+    }
+  agent: vehicle_spec_comparer
+  inputs:
+    image_urls: "{{ vehicle_image_finder.output }}"
+  output_type: json
+
+ads_for_vehicle1:
+  description: >
+    Find active listings for {vehicle1} in Sri Lankan websites (sites like ikman.lk/en/ads/sri-lanka/cars, riyasewana.com, patpat.lk/vehicle) published within the last 7 days.
+  expected_output: >
+    A list of vehicle sale advertisement listings in Sri Lanka for {vehicle1} including:
+      - Full URL to the advertisement
+      - title
+      - price
+      - year
+      - mileage
+      - location
+      - description
+  agent: srilankan_ad_finder
+
+ads_for_vehicle2:
+  description: >
+    Find active listings for {vehicle2} in Sri Lankan websites (sites like ikman.lk/en/ads/sri-lanka/cars, riyasewana.com, patpat.lk/vehicle) published within the last 7 days.
+  expected_output: >
+    A list of vehicle sale advertisement listings in Sri Lanka for {vehicle2} including:
+      - Full URL to the advertisement
+      - title
+      - price
+      - year
+      - mileage
+      - location
+      - description,
+  agent: srilankan_ad_finder
+
+generate_ad_report:
+  agent: ad_report_generator
+  description: >
+    "Extract structured data from each advertisemnt URL in ad_urls list and generate JSON report.
+  expected_output: >
+    A well-formatted JSON object with the following exact structure:
+    {
+      vehicle1_ads: [
+        {
+          "url": "advertisement url",
+          "title": "title",
+          "price": "price",
+          "year": "year",
+          "mileage": "mileage",
+          "location": "location",
+          "description": "description"
+        }
+      ],
+      vehicle2_ads: [
+        {
+          "url": "advertisement url",
+          "title": "title",
+          "price": "price",
+          "year": "year",
+          "mileage": "mileage",
+          "location": "location",
+          "description": "description"
+        }
+      ]
+    }
+  inputs:
+    ad_urls: "{{ ads_for_vehicle1.output + ads_for_vehicle2.output }}"
+  output_type: json
